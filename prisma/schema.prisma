@@ -1,0 +1,41 @@
+generator client {
+    provider        = "prisma-client"
+    output          = "../generated/prisma"
+    moduleFormat    = "cjs"
+    previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+    provider = "postgresql"
+    schemas  = ["rnacen"]
+}
+
+model Locus {
+    //    id    |       assembly_id       |                                            locus_name                                             | public_locus_name |    chromosome     | strand | locus_start | locus_stop | member_count
+    id              Int            @id @default(autoincrement())
+    assemblyId      String         @map("assembly_id")
+    locusName       String         @map("locus_name")
+    publicLocusName String         @map("public_locus_name")
+    chromosome      String
+    strand          Int
+    locusStart      Int            @map("locus_start")
+    locusStop       Int            @map("locus_stop")
+    memberCount     Int            @map("member_count")
+    locusMembers    LocusMembers[]
+
+    @@map("rnc_locus")
+    @@schema("rnacen")
+}
+
+model LocusMembers {
+    // urs_taxid       | region_id | locus_id | membership_status
+    id               Int    @id @default(autoincrement())
+    userTaxId        String    @map("urs_taxid")
+    regionId         Int    @map("region_id")
+    membershipStatus String @map("membership_status")
+    locus            Locus  @relation(fields: [locusId], references: [id])
+    locusId          Int    @map("locus_id")
+
+    @@map("rnc_locus_members")
+    @@schema("rnacen")
+}

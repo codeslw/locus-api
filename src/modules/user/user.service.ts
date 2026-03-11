@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { usersMock } from './mock/users.mock';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcryptjs';
@@ -19,6 +19,10 @@ export class UserService {
   }
 
   async create(user: CreateUserDto) {
+    const userExists = usersMock.find((u) => u.email === user.email);
+    if (userExists) {
+      throw new ConflictException('User with such email already exists');
+    }
     const payload = {
       email: user.email,
       role: user.role,
@@ -28,7 +32,7 @@ export class UserService {
       id: crypto.randomUUID(),
     };
     usersMock.push(payload);
-    return { ...payload, password: undefined };
+    return { ...payload, email: user.email, password: undefined };
   }
 
   async update(user: CreateUserDto) {
